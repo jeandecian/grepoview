@@ -5,5 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Grepoview - A GitHub Repository Viewer</title>
   </head>
-  <body></body>
+  <body>
+    <h1>Grepoview</h1>
+    <form id="username-form">
+      <label for="username-input">Username:</label>
+      <input
+        type="text"
+        id="username-input"
+        placeholder="Enter GitHub username"
+        required
+      />
+      <button type="submit">View Repositories</button>
+    </form>
+    <br />
+    <div id="status-message"></div>
+    <pre id="repo-list"></pre>
+    <script>
+      document
+        .getElementById("username-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const username = document.getElementById("username-input").value;
+          const statusMessage = document.getElementById("status-message");
+          const repoList = document.getElementById("repo-list");
+          statusMessage.textContent = "Loading...";
+          repoList.textContent = "";
+
+          fetch(`https://api.github.com/users/${username}/repos`)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "Network response was not ok " + response.statusText
+                );
+              }
+
+              return response.json();
+            })
+            .then((data) => {
+              if (data.length === 0) {
+                statusMessage.textContent = "No repositories found.";
+                return;
+              }
+
+              statusMessage.textContent = `Found ${data.length} repositories:`;
+
+              repoList.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch((error) => {
+              statusMessage.textContent = `Error: ${error.message}`;
+            });
+        });
+    </script>
+  </body>
 </html>
